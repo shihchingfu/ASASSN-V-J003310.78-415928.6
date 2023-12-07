@@ -1,0 +1,43 @@
+---
+title: "eda"
+format: html
+---
+
+```{r}
+library(conflicted)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(here)
+```
+
+```{r}
+j0033_df <- read_csv(here("data_raw", "ASASSN-V J003310.78+415928.6.csv"),
+                     col_types = "dfdddd")
+
+glimpse(j0033_df)
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| message: false
+known_period <-  3.6118828
+
+j0033_df |> 
+  dplyr::filter(camera == "bb") |> 
+  mutate(phase = (hjd %% known_period)/known_period) |> 
+  ggplot() +
+  aes(x = phase, y = mag)  +
+  geom_linerange(aes(ymin = mag - mag_err, ymax = mag + mag_err),
+                 colour = "grey", alpha = 1) +
+  geom_point(colour = "blue", alpha = 0.7) +
+  geom_rug(sides = "b", colour = "blue") +
+  scale_y_reverse() +
+  labs(x = "Orbital Phase", y = "Magnitude") +
+  theme_classic()
+
+ggsave(here("figures", "j0033_magn.jpg"))
+  
+```
+
